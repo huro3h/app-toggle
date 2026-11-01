@@ -6,6 +6,12 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-02
+
+### Added
+
+- 動作環境(macOS・Swift 5.7 以上・Ruby 4 以上など)を確かめる `check-requirements.sh`。`setup.rb` の最初に自動で実行され、足りないものがあれば何も変更せずに止まる
+
 ## [1.0.0] - 2026-11-02
 
 ### Added

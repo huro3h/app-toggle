@@ -87,6 +87,28 @@ IDE のようにショートカットが多いアプリと衝突させないた�
 - 仮想キーコードは物理位置。`kVK_ANSI_*` は US 刻印の名前だが、JIS 配列でも英数字の位置は同じ。
   JIS 固有は `eisu` / `kana` だけ足してある
 
+## 動作環境の確認(`check-requirements.sh`)
+
+`setup.rb` が最初に `system` で呼び、失敗したら何も変更せずに止まる。
+
+- **sh で書いている。** Ruby が古い・無い状態でも結果を出したいため。`/bin/bash` は 3.2 なので新しい機能は使わない。
+  バージョン比較は `sort -V`
+- **Ruby は 4 以上を要件にした(3 以下はサポート対象外)。** 2026-11-02 にユーザーが決めた。
+  コード上は Ruby 3.0 の1行 `def` が最も新しい構文だが、動作を確かめる範囲を絞るため。
+  `setup.rb` は Ruby 3 なら読み込めるので、チェックの NG まで表示される。2.x では構文エラーで止まるが、対象外なので構わない
+- 確かめるのは TUI が使う「PATH で最初に見つかる `ruby`」。daemon はバイナリなので Ruby に依存しない
+- **`command -v swiftc` で有無を判定してはいけない。** `/usr/bin/swiftc` は Command Line Tools が無くても
+  全ての Mac にある代理のコマンドで、無い状態で実行するとインストールのダイアログが出る。
+  先に `xcode-select -p` で Command Line Tools / Xcode の有無を見て、あるときだけ `swiftc` を呼ぶ
+- **Swift 5.7 以上を要件にしている**(`SWIFT_MIN`)。daemon が `if let error {` の省略形(5.7 から)を使うため。
+  Xcode 14 / Command Line Tools 14 以降が該当。daemon に新しい構文を使ったら、ここも上げること
+- バージョンに加えて `import AppKit` / `import Carbon.HIToolbox` を `-typecheck` に通して確かめる。
+  macOS を上げた直後などに SDK だけ壊れていることがあるため。エラー文に license を含むときは
+  Xcode のライセンス未同意として、`sudo xcodebuild -license accept` を案内する(Xcode.app を使っている場合だけ起きる)
+- Homebrew は任意(リンク先の候補になるだけ)なので、NG ではなく情報として出す
+- 失敗時の確認: 偽の `ruby`(`printf 3.3.6` するだけ)を PATH の先頭に置き、本物の ruby で `setup.rb --apply` を実行する。
+  Swift も同様に、`--version` で古い版を名乗る偽の `swiftc`、ライセンスのエラーを返す偽の `swiftc` で確かめた
+
 ## setup.rb の入れ替え
 
 `launchctl bootout` は外し終わる前に戻ることがあり、すぐ `bootstrap` すると

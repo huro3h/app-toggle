@@ -15,6 +15,32 @@ Thor Launcher と同じ動きを、サードパーティのアプリを使わず
 - 常駐は launchd の LaunchAgent。保存すると常駐へ即座に反映され、登録できたかどうかがその場で表示される
 - アクセシビリティや入力監視の許可は要らない
 
+## 要件
+
+| もの | 必須 | 用途 |
+|---|---|---|
+| macOS 10.15 以上 | 必須 | 動作確認は macOS 15 |
+| Command Line Tools または Xcode(Swift 5.7 以上) | 必須 | 常駐する daemon のビルド。AppKit と Carbon を使う。Xcode 14 / Command Line Tools 14 以降なら満たす |
+| Ruby 4 以上 | 必須 | TUI と `setup.rb`。**3 以下はサポート対象外** |
+| Ruby 標準ライブラリ: `optparse` `json` `open3` `io/console` `fileutils` | 必須 | どれも Ruby に標準で入っている。gem の追加は不要 |
+| `launchctl` `plutil` `ps` | 必須 | macOS 標準のコマンド |
+| Homebrew | 任意 | `app-toggle` コマンドのリンクを置く先の第一候補(無ければ `/usr/local/bin` か `~/bin`) |
+
+揃っているかは `./check-requirements.sh` で確かめられる。`setup.rb` も最初に自動で実行し、
+足りないものがあれば何も変更せずに止まる。
+
+```
+app-toggle の動作環境を確認しています
+  OK  macOS 15.7.2
+  OK  Command Line Tools / Xcode (/Library/Developer/CommandLineTools)
+  OK  Swift 6.2.1(AppKit / Carbon を読み込める)
+  OK  Ruby 4.0.6 (~/.rbenv/shims/ruby)
+  ...
+```
+
+Ruby は、TUI を起動するときに PATH で最初に見つかるもの(`#!/usr/bin/env ruby`)を確かめる。
+常駐する daemon はコンパイル済みのバイナリなので、Ruby のバージョンには左右されない。
+
 ## セットアップ
 
 ```bash
@@ -24,7 +50,8 @@ Thor Launcher と同じ動きを、サードパーティのアプリを使わず
 
 `setup.rb --apply` は以下を行う。
 
-1. `app-toggle-daemon.swift` を `build/app-toggle-daemon` にコンパイルする(Xcode の Command Line Tools が必要)
+0. `check-requirements.sh` で動作環境を確かめる(足りなければここで止まる)
+1. `app-toggle-daemon.swift` を `build/app-toggle-daemon` にコンパイルする
 2. `~/Library/LaunchAgents/local.app-toggle.plist` をテンプレートから生成し、`launchctl` で読み込む
 3. PATH の通ったディレクトリ(`/opt/homebrew/bin` → `/usr/local/bin` → `~/bin` の順で最初に書き込めるもの)に、
    `app-toggle.rb` へのシンボリックリンクを `app-toggle` という名前で張る
@@ -116,13 +143,11 @@ tail -f ~/Library/Logs/app-toggle.log
 | `app-toggle-daemon.swift` | 常駐本体。ホットキーの登録と表示・隠すの切り替え |
 | `app-toggle.rb` | 割り当て用の TUI(Ruby、標準ライブラリのみ) |
 | `setup.rb` | ビルド、LaunchAgent の登録、PATH リンクの作成/削除 |
+| `check-requirements.sh` | 動作環境の確認(`setup.rb` からも呼ばれる) |
 | `local.app-toggle.plist.template` | LaunchAgent のテンプレート |
 
 実装の詳細・設計判断は `.claude/skills/app-toggle/SKILL.md` を参照。
 
-## 要件
-
-macOS / Xcode Command Line Tools(`swiftc`) / Ruby(追加の gem は不要)
 
 ## ライセンス
 

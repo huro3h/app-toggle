@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 # app-toggle のセットアップ。
+#   0. check-requirements.sh で動作環境を確かめる(足りなければ何もせずに止まる)。
 #   1. app-toggle-daemon.swift を build/ にコンパイルする。
 #   2. LaunchAgent の plist をテンプレートから生成して読み込ませる。
 #      plist には daemon と設定ファイルの絶対パスが要るので、静的ファイルでは持ち運べない。
@@ -19,6 +20,7 @@ TEMPLATE  = File.join(TOOL_ROOT, "#{LABEL}.plist.template")
 SOURCE    = File.join(TOOL_ROOT, 'app-toggle-daemon.swift')
 DAEMON    = File.join(TOOL_ROOT, 'build', 'app-toggle-daemon')
 TUI       = File.join(TOOL_ROOT, 'app-toggle.rb')
+CHECK     = File.join(TOOL_ROOT, 'check-requirements.sh')
 CONFIG    = File.join(TOOL_ROOT, 'app-toggle.json')
 DEST      = File.join(Dir.home, 'Library', 'LaunchAgents', "#{LABEL}.plist")
 LOG       = File.join(Dir.home, 'Library', 'Logs', 'app-toggle.log')
@@ -68,6 +70,11 @@ if opts[:uninstall]
   puts "削除しました: #{LABEL}(設定ファイルと build/ は残しています)"
   exit 0
 end
+
+# ビルドや常駐の登録を始める前に、必要なものが揃っているかを確かめる。ドライランでも走らせ、
+# 足りないものがあれば先に分かるようにする。結果はスクリプトがそのまま表示する。
+die('動作環境が揃っていません(上の NG を参照)') unless system(CHECK)
+puts
 
 die("テンプレートがありません: #{TEMPLATE}") unless File.exist?(TEMPLATE)
 die("ソースがありません: #{SOURCE}") unless File.exist?(SOURCE)
