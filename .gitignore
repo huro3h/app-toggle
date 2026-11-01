@@ -1,0 +1,5 @@
+build/
+# 手元の環境に固有のショートカット割り当て
+app-toggle.json
+
+.DS_Store
