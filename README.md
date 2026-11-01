@@ -118,6 +118,12 @@ app-toggle のショートカットを**全て**外し、キーをそのアプ�
 ## 設定
 
 `app-toggle.json`(`.gitignore` 済み)。TUI が書き出すので、手で書く必要はない。
+書式の雛形として `app-toggle.example.json` を置いてある。手で書きたい場合はコピーして使う
+(割り当ては架空の例なので、そのまま使うと手元のショートカットと衝突しうる)。
+
+```bash
+cp app-toggle.example.json app-toggle.json && app-toggle --reload
+```
 
 ```json
 {
@@ -129,6 +135,22 @@ app-toggle のショートカットを**全て**外し、キーをそのアプ�
 ```
 
 環境変数 `APP_TOGGLE_CONFIG` で TUI が読むパスを変えられる(常駐が読むのは plist に書いたパスのまま)。
+
+### dotfiles などで git 管理する
+
+設定ファイルを dotfiles のリポジトリへ移し、元の場所にシンボリックリンクを置く。
+
+```bash
+mv ~/projects/app-toggle/app-toggle.json ~/dotfiles/app-toggle.json
+ln -s ~/dotfiles/app-toggle.json ~/projects/app-toggle/app-toggle.json
+app-toggle --reload    # 常駐に読み直させて、登録結果を確認
+```
+
+- TUI で保存しても、リンクは置き換わらずにリンク先が書き換わる。常駐もリンクをたどって読む
+- `APP_TOGGLE_CONFIG` で場所を変える方法は使わない。効くのは TUI だけで、常駐は元のパスを読み続けるため
+- `app-toggle.json` は `.gitignore` 済みなので、リンクがこのリポジトリにコミットされることはない
+- 割り当ては bundle id で書いているので、複数の Mac で同じ設定ファイルを共有できる。
+  片方にしか入っていないアプリは、TUI では「(アプリ未検出)」として一覧の先頭に残り、保存しても消えない
 
 ```bash
 # 状態確認 / ログ追尾
@@ -145,6 +167,7 @@ tail -f ~/Library/Logs/app-toggle.log
 | `setup.rb` | ビルド、LaunchAgent の登録、PATH リンクの作成/削除 |
 | `check-requirements.sh` | 動作環境の確認(`setup.rb` からも呼ばれる) |
 | `local.app-toggle.plist.template` | LaunchAgent のテンプレート |
+| `app-toggle.example.json` | 設定ファイルの雛形(実体の `app-toggle.json` は `.gitignore`) |
 
 実装の詳細・設計判断は `.claude/skills/app-toggle/SKILL.md` を参照。
 

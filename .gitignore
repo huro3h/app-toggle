@@ -1,5 +1,5 @@
 build/
-# 手元の環境に固有のショートカット割り当て
+# 手元の環境に固有のショートカット割り当て。雛形は app-toggle.example.json
 app-toggle.json
 
 .DS_Store

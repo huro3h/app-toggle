@@ -1,0 +1,15 @@
+{
+  "hotkeys": [
+    {
+      "bundle_id": "com.apple.Terminal",
+      "key": "ctrl+opt+t"
+    },
+    {
+      "bundle_id": "com.apple.Safari",
+      "key": "ctrl+opt+s"
+    }
+  ],
+  "disabled_in": [
+    "com.apple.dt.Xcode"
+  ]
+}
