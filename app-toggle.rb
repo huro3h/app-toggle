@@ -16,7 +16,7 @@ Encoding.default_external = Encoding::UTF_8
 Encoding.default_internal = nil
 
 # リリース時はこことタグ(注釈付き・v なしの数字のみ)と CHANGELOG.md を揃える。
-VERSION = '1.1.0'
+VERSION = '1.2.0'
 
 def utf8(str) = str.to_s.dup.force_encoding(Encoding::UTF_8).scrub
 

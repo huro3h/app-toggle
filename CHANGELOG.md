@@ -6,6 +6,13 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-02
+
+### Added
+
+- 設定ファイルの雛形 `app-toggle.example.json`
+- 設定ファイルを dotfiles などで git 管理する手順(シンボリックリンクにする)を README に追加
+
 ## [1.1.0] - 2026-11-02
 
 ### Added
