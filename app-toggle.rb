@@ -63,7 +63,7 @@ def agent_loaded?
 end
 
 # SIGHUP を送り、daemon がログに書く登録結果を拾って見せる。登録に失敗するのは主に
-# 他のアプリ(Thor Launcher など)が同じ組み合わせを先に掴んでいるときで、
+# 他のアプリが同じ組み合わせを先に掴んでいるときで、
 # それは daemon が実際に登録を試みるまで分からない。
 def reload_daemon
   unless agent_loaded?
@@ -211,7 +211,7 @@ def run_tui
   die('インストール済みアプリを1件も検出できませんでした') if apps.empty?
 
   cfg = load_config
-  # bundle id → 正規形のキー指定。1アプリにつき1つ(Thor Launcher と同じ)。
+  # bundle id → 正規形のキー指定。1アプリにつき1つ。
   keys = {}
   display = {} # 正規形 → 表示(⌃⌥T)。daemon への問い合わせを1回で済ませるための控え
   broken = []

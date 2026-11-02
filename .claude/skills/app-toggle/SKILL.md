@@ -1,9 +1,9 @@
 ---
 name: app-toggle
-description: アプリごとのショートカットキーで表示・隠すを切り替える macOS 個人ツール app-toggle(Thor Launcher の代替)の改修・設定・launchd 常駐。ホットキー登録(Carbon RegisterEventHotKey)、前面アプリでの無効化、TUI での割り当て、Swift daemon のビルドを扱うときに参照。
+description: アプリごとのショートカットキーで表示・隠すを切り替える macOS 個人ツール app-toggle の改修・設定・launchd 常駐。ホットキー登録(Carbon RegisterEventHotKey)、前面アプリでの無効化、TUI での割り当て、Swift daemon のビルドを扱うときに参照。
 ---
 
-# `app-toggle` — Thor Launcher 相当をスクリプトだけで
+# `app-toggle` — アプリの表示・隠すをショートカットで切り替える
 
 実体: `~/projects/app-toggle/`。構成と TUI の作りは `app-respawn` を下敷きにしている
 (アプリ列挙・raw モードの絞り込み UI・`setup` の流儀は同じ。違いだけをここに書く)。
@@ -30,7 +30,7 @@ CGEventTap や `NSEvent.addGlobalMonitorForEvents` はアクセシビリティ/�
 ターミナルや launchd 経由だと許可の主体がややこしい(app-respawn で責任プロセス問題を踏んだ)。
 
 - 他のアプリが同じ組み合わせを先に登録していると `-9878`(`eventHotKeyExistsErr`)。
-  ログに `NG ... 他のアプリが使用中` と出る。Thor Launcher と併用中はこれが出る
+  ログに `NG ... 他のアプリが使用中` と出る
 - Carbon のハンドラは C 関数ポインタなのでクロージャで捕捉できない。`targets` など状態はグローバル変数
 - SIGHUP は `DispatchSource.makeSignalSource` でメインキューに受ける(シグナルハンドラ内で Carbon を呼ばない)
 
