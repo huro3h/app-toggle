@@ -4,6 +4,7 @@
 //   SIGHUP で設定を読み直す(TUI が保存後に送る)。
 //   disabled_in に書いたアプリが前面にある間は、ホットキーを全部外してキーを素通しする。
 //   無効/有効が切り替わったときは、画面右上に1秒だけ表示を出す。
+//   未起動のアプリを起動するときは、launch-indicator へ分散通知で知らせる。
 //
 //   app-toggle-daemon --config PATH   常駐する(launchd から起動する用)
 //   app-toggle-daemon --parse SPEC    キー指定を検証して「正規形<TAB>表示」を出すだけ(TUI 用)
@@ -143,11 +144,31 @@ func toggle(_ bundleID: String) {
   // 起動済みなら前面に出し、隠れていれば再表示し、ウィンドウが無ければ Dock のクリックと同じく
   // 開き直させる(reopen イベント)。未起動なら起動する。NSRunningApplication.activate() を
   // 使わないのは、この3つを自分で場合分けする必要がなくなるため。
+  let willLaunch = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty
+  if willLaunch { notifyLaunchIndicator(launchWillStart, bundleID: bundleID, url: url) }
   let config = NSWorkspace.OpenConfiguration()
   config.activates = true
   workspace.openApplication(at: url, configuration: config) { _, error in
-    if let error { log("前面に出せませんでした: \(bundleID) \(error.localizedDescription)") }
+    guard let error else { return }
+    log("前面に出せませんでした: \(bundleID) \(error.localizedDescription)")
+    if willLaunch { notifyLaunchIndicator(launchDidFail, bundleID: bundleID, url: url) }
   }
+}
+
+// launch-indicator への知らせ。キーを押してから macOS の起動通知(willLaunch)が届くまでに
+// 間があることがあるので、起動を頼んだ時点で知らせて、すぐ「起動中」を出してもらう。
+// 通知の名前は launch-indicator.swift と揃える。launch-indicator が動いていなければ誰も受けない。
+let launchWillStart = Notification.Name("local.launch-indicator.willStart")
+let launchDidFail = Notification.Name("local.launch-indicator.didFail")
+
+// 表示名はファイル名から .app を除いたもの。素のバイナリからは「計算機」のような言語ごとの名前を
+// 引けないが(FileManager.displayName も .app 付きの英語名を返す)、willLaunch が来た時点で
+// launch-indicator が macOS の名前に置き換えるので、ここでは手軽な取り方で足りる。
+func notifyLaunchIndicator(_ name: Notification.Name, bundleID: String, url: URL) {
+  // 受け手は前面に出ない常駐なので、配送を後回しにされないよう deliverImmediately にする
+  DistributedNotificationCenter.default().postNotificationName(
+    name, object: bundleID,
+    userInfo: ["name": url.deletingPathExtension().lastPathComponent], deliverImmediately: true)
 }
 
 let signature = OSType(0x5447_4C45)  // 'TGLE'

@@ -47,6 +47,20 @@ CGEventTap や `NSEvent.addGlobalMonitorForEvents` はアクセシビリティ/�
 > 2026-11-02 に launchd 配下で実測済み(合成キー入力で 起動→隠す→表示→隠す を確認)。
 > 手動実行だけで確かめないこと(app-respawn の教訓)。
 
+## launch-indicator への知らせ
+
+ホットキーで**未起動の**アプリを開くときは、`openApplication` の直前に分散通知
+`local.launch-indicator.willStart`(object = bundle ID、userInfo の `name` = 表示名)を送る。
+`openApplication` が失敗したら `local.launch-indicator.didFail` を送る。
+
+- 理由: launch-indicator は NSWorkspace の willLaunch で表示を始めるが、`openApplication` から
+  willLaunch までに macOS の検証などで間があることがあり、キーを押してもしばらくバナーが出なかった(2026-11-10)
+- **`deliverImmediately: true` で送る。** 受け手は前面に出ない常駐なので、既定では配送を後回しにされうる
+- 表示名はファイル名から `.app` を除いたもの。素のバイナリからは「計算機」のような言語ごとの名前が取れない
+  (`FileManager.displayName` も `localizedNameKey` も `Calculator.app` を返し、InfoPlist.strings を引いても
+  計算機は出ない)。willLaunch の時点で launch-indicator が macOS の名前に置き換えるので、これで足りる
+- 通知の名前は `launch-indicator.swift` と揃える。launch-indicator が動いていなければ誰も受けないだけ
+
 ## 前面アプリでの無効化(`disabled_in`)
 
 IDE のようにショートカットが多いアプリと衝突させないための機能。
